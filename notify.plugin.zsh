@@ -12,16 +12,15 @@ else
 fi
 
 zstyle ':notify:*' plugin-dir "$plugin_dir"
-zstyle ':notify:*' command-complete-timeout 15
+zstyle ':notify:*' command-complete-timeout 10
 zstyle ':notify:*' error-log /dev/stderr
 zstyle ':notify:*' notifier zsh-notify
 zstyle ':notify:*' expire-time 0
 zstyle ':notify:*' app-name ''
-zstyle ':notify:*' notifier zsh-notify
-zstyle ':notify:*' success-title '#win (in #{time_elapsed})'
+zstyle ':notify:*' success-title 'Command succeeded (in #{time_elapsed} seconds)'
 zstyle ':notify:*' success-sound ''
 zstyle ':notify:*' success-icon ''
-zstyle ':notify:*' error-title '#fail (in #{time_elapsed})'
+zstyle ':notify:*' error-title 'Command failed (in #{time_elapsed} seconds)'
 zstyle ':notify:*' error-sound ''
 zstyle ':notify:*' error-icon ''
 zstyle ':notify:*' disable-urgent no
@@ -43,6 +42,8 @@ function _zsh-notify-expand-command-aliases() {
 }
 
 SKIP_NOTIFY_COMMANDS=(
+  find
+  git
   fg
   bat
   cat
@@ -149,6 +150,18 @@ function zsh-notify-after-command() {
     )  2>&1 | sed 's/^/zsh-notify: /' >> "$error_log"
 
     unset zsh_notify_last_command zsh_notify_start_time
+}
+
+function zsh-notify-list-sounds() {
+    if [[ "$TERM_PROGRAM" == 'iTerm.app' ]] || [[ "$TERM_PROGRAM" == 'Apple_Terminal' ]] || [[ -n "$ITERM_SESSION_ID" ]] || [[ -n "$TERM_SESSION_ID" ]]; then
+        ls /System/Library/Sounds/ | \
+        grep '\.aiff$' | sed 's/\.aiff$//' | \
+        fzf --prompt='Select sound: ' --style=minimal --height=40% --layout=reverse --preview='afplay /System/Library/Sounds/{}.aiff' --preview-window=down,border-top,10% | \
+        xargs -I{} echo "Execute: zstyle ':notify:*' success-sound '{}' or zstyle ':notify:*' error-sound '{}'"
+    else
+        echo "zsh-notify-list-sounds: not supported" >&2
+        return
+    fi
 }
 
 zmodload zsh/datetime
