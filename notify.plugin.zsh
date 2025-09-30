@@ -18,10 +18,10 @@ zstyle ':notify:*' notifier zsh-notify
 zstyle ':notify:*' expire-time 0
 zstyle ':notify:*' app-name ''
 zstyle ':notify:*' success-title 'Command succeeded (in #{time_elapsed} seconds)'
-zstyle ':notify:*' success-sound ''
+zstyle ':notify:*' success-sound 'Submarine'
 zstyle ':notify:*' success-icon ''
 zstyle ':notify:*' error-title 'Command failed (in #{time_elapsed} seconds)'
-zstyle ':notify:*' error-sound ''
+zstyle ':notify:*' error-sound 'Basso'
 zstyle ':notify:*' error-icon ''
 zstyle ':notify:*' disable-urgent no
 zstyle ':notify:*' activate-terminal no
@@ -150,9 +150,20 @@ function zsh-notify-after-command() {
     )  2>&1 | sed 's/^/zsh-notify: /' >> "$error_log"
 
     unset zsh_notify_last_command zsh_notify_start_time
+
+    # Enforce loading of this function
+    zsh-notify-list-sounds "true"
 }
 
 function zsh-notify-list-sounds() {
+    local load
+    load=$1
+
+    # When called with "true", just load the function without executing it
+    if [[ "$load" == "true" ]]; then
+        return
+    fi
+
     if [[ "$TERM_PROGRAM" == 'iTerm.app' ]] || [[ "$TERM_PROGRAM" == 'Apple_Terminal' ]] || [[ -n "$ITERM_SESSION_ID" ]] || [[ -n "$TERM_SESSION_ID" ]]; then
         ls /System/Library/Sounds/ | \
         grep '\.aiff$' | sed 's/\.aiff$//' | \
