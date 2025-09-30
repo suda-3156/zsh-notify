@@ -12,7 +12,7 @@ else
 fi
 
 zstyle ':notify:*' plugin-dir "$plugin_dir"
-zstyle ':notify:*' command-complete-timeout 30
+zstyle ':notify:*' command-complete-timeout 15
 zstyle ':notify:*' error-log /dev/stderr
 zstyle ':notify:*' notifier zsh-notify
 zstyle ':notify:*' expire-time 0
@@ -29,8 +29,8 @@ zstyle ':notify:*' activate-terminal no
 zstyle ':notify:*' always-check-active-window no
 zstyle ':notify:*' check-focus yes
 zstyle ':notify:*' blacklist-regex ''
-zstyle ':notify:*' enable-on-ssh no
-zstyle ':notify:*' always-notify-on-failure yes
+zstyle ':notify:*' enable-on-ssh yes
+zstyle ':notify:*' always-notify-on-failure no
 
 unset plugin_dir
 
@@ -42,14 +42,50 @@ function _zsh-notify-expand-command-aliases() {
     unset 'functions[__expand-aliases-tmp]'
 }
 
+SKIP_NOTIFY_COMMANDS=(
+  fg
+  bat
+  cat
+  lazygit
+  lg
+  man
+  nb
+  nvim
+  ssh
+  vim
+  watch
+  "vagrant ssh"
+  "mise run emulate"
+  "npm run dev"
+  "npm run preview"
+  "npm run server"
+  "npm run start"
+  "pnpm dev"
+  "pnpm run dev"
+  "pnpm run preview"
+  "pnpm run server"
+  "pnpm run start"
+  "yarn run dev"
+  "yarn run preview"
+  "yarn run server"
+  "yarn run start"
+)
+
 function _zsh-notify-is-command-blacklisted() {
+    local cmd
+    cmd="$(_zsh-notify-expand-command-aliases "$zsh_notify_last_command")"
+    for skip_cmd in "${SKIP_NOTIFY_COMMANDS[@]}"; do
+        if [[ "$cmd" == "$skip_cmd" || "$cmd" == "$skip_cmd"* ]]; then
+            return 0
+        fi
+    done
+
     local blacklist_regex
     zstyle -s ':notify:*' blacklist-regex blacklist_regex
     if [[ -z "$blacklist_regex" ]]; then
         return 1
     fi
-    local cmd
-    cmd="$(_zsh-notify-expand-command-aliases "$zsh_notify_last_command")"
+
     print -rn -- "$cmd" | grep -q -E "$blacklist_regex"
 }
 

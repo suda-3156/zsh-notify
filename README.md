@@ -1,6 +1,13 @@
 zsh-notify
 ===
 
+### Note
+
+- Added `SKIP_NOTIFY_COMMANDS` for easily manage blacklist. [Original](https://eiji.page/blog/zsh-long-command-notify/)
+- Changed some default configs
+
+---
+
 Desktop notifications for long-running commands in ZSH.
 
 Supported terminals
