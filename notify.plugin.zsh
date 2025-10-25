@@ -70,6 +70,7 @@ SKIP_NOTIFY_COMMANDS=(
   "yarn run preview"
   "yarn run server"
   "yarn run start"
+  "gcloud auth application-default login"
 )
 
 function _zsh-notify-is-command-blacklisted() {
